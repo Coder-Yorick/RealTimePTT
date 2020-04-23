@@ -7,18 +7,21 @@ from PyPtt import PTT
 
 ptt_bot = PTT.API()
 Year = datetime.now().year
+ID = None
+Password = None
 
 def main():
+    global ID, Password
     try:
         with open('Account.json') as AccountFile:
             Account = json.load(AccountFile)
             ID = Account['ID']
             Password = Account['Password']
     except FileNotFoundError:
-        ID = input('your ID')
-        Password = getpass.getpass('your PW')
-    
-    ptt_bot.login(ID, Password, kick_other_login=True)
+        ID = input('your ID:')
+        Password = getpass.getpass('your PW:')
+
+    connect()
 
     newest_dt = datetime.today().replace(hour=0, minute=0)
     while True:
@@ -27,8 +30,24 @@ def main():
             time.sleep(5)
         except KeyboardInterrupt:
             break
+        except:
+            time.sleep(5)
+            newest_dt = newest_dt + timedelta(minutes=-5)
+            connect()
+    try:
+        ptt_bot.logout()
+    except:
+        pass
 
-    ptt_bot.logout()
+def connect():
+    while True:
+        try:
+            ptt_bot.login(ID, Password, kick_other_login=True)
+            break
+        except KeyboardInterrupt:
+            break
+        except:
+            time.sleep(5)
 
 def watcher(newest_dt = datetime.today):
     this_newest_dt = newest_dt
